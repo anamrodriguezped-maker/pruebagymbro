@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym Body Master - Sistema Operativo y ERP Integral</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-main: #0b0f19;
+            --bg-card: #131826;
+            --bg-sidebar: #0f1423;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-green: #10b981;
+            --text-main: #ffffff;
+            --text-muted: #9ca3af;
+            --border-color: #1f293d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Pantalla de Login */
+        #auth-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .auth-card {
+            background-color: var(--bg-card);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            width: 380px;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .auth-card h2 {
+            color: var(--accent-orange);
+            margin-bottom: 5px;
+            font-size: 1.4rem;
+        }
+
+        .auth-card p {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-bottom: 20px;
+        }
+
+        .auth-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .auth-group label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .auth-group input {
+            width: 100%;
+            padding: 10px;
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 10px;
+            background: var(--accent-orange);
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        /* Layout Principal */
+        #app-layout {
+            display: none;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Sidebar Operativo */
+        aside {
+            width: 260px;
+            background-color: var(--bg-sidebar);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--accent-orange);
+            margin-bottom: 30px;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+            max-height: calc(100vh - 180px);
+            padding-right: 5px;
+        }
+
+        .nav-links::-webkit-scrollbar {
+            width: 4px;
+        }
+        .nav-links::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .nav-links li a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-links li.active a, .nav-links li a:hover {
+            background-color: var(--accent-orange);
+            color: #000;
+            font-weight: 600;
+        }
+
+        .sidebar-footer {
+            background: linear-gradient(135deg, #131826, #1f293d);
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .sidebar-footer h4 {
+            font-size: 0.8rem;
+            color: var(--accent-orange);
+            margin-bottom: 2px;
+        }
+
+        .sidebar-footer p {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        /* Main Content Layout */
+        main {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .section-view {
+            display: none;
+            grid-column: 1 / -1;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .section-view.active-view {
+            display: grid;
+        }
+
+        .full-width-view {
+            display: none;
+            grid-column: 1 / -1;
+            width: 100%;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .full-width-view.active-view {
+            display: flex;
+        }
+
+        .dashboard-left {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .welcome-banner {
+            background: linear-gradient(135deg, #131826, #1f293d);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .welcome-banner h1 {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+
+        .welcome-banner p {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        /* Metrics Row */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .metric-card {
+            background-color: var(--bg-card);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .metric-card .header-metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .metric-card span {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .metric-card h3 {
+            font-size: 1.4rem;
+        }
+
+        .metric-card .sub-text {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        /* Analytics & Inventory Row */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .widget-box {
+            background-color: var(--bg-card);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .widget-box h3 {
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .widget-box h3 a {
+            font-size: 0.75rem;
+            color: var(--accent-orange);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Quick Actions Panel */
+        .quick-actions {
+            background-color: var(--bg-card);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .action-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.2s;
+            background: none;
+            border: none;
+        }
+
+        .action-item:hover {
+            color: var(--accent-orange);
+        }
+
+        .action-icon {
+            width: 35px;
+            height: 35px;
+            background-color: #1f293d;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        /* Right Column Widgets */
+        .dashboard-right {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--accent-orange);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--accent-red);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+        }
+
+        /* Tablas de Módulos */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+
+        .data-table th, .data-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            color: var(--text-muted);
+            background: var(--bg-main);
+        }
+
+        /* Modales Extensos y Profesionales */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .modal-content {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 12px;
+            width: 550px;
+            max-width: 100%;
+            border: 1px solid var(--border-color);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-content h2 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            color: var(--accent-orange);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        .form-group.full {
+            grid-column: span 2;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .modal-content input, .modal-content select, .modal-content textarea {
+            width: 100%;
+            padding: 9px;
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+        .modal-content textarea {
+            resize: vertical;
+            height: 70px;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 15px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 12px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        .btn-primary { background: var(--accent-orange); color: #000; }
+        .btn-secondary { background: #1f293d; color: var(--text-main); }
+        .btn-danger { background: var(--accent-red); color: #fff; }
+    </style>
+</head>
+<body>
+
+    <!-- PANTALLA DE INICIO DE SESIÓN -->
+    <div id="auth-screen">
+        <div class="auth-card">
+            <h2>⚡ GYM BODY MASTER</h2>
+            <p>Acceso administrativo unificado</p>
+            <div class="auth-group">
+                <label>Usuario</label>
+                <input type="text" id="login-user" placeholder="Tu usuario registrado">
+            </div>
+            <div class="auth-group">
+                <label>Contraseña</label>
+                <input type="password" id="login-pass" placeholder="••••••••">
+            </div>
+            <button class="auth-btn" onclick="intentarLogin()">Iniciar Sesión</button>
+        </div>
+    </div>
+
+    <!-- APLICACIÓN PRINCIPAL -->
+    <div id="app-layout">
+        <!-- BARRA LATERAL (SIDEBAR FUNCIONAL Y EXTENSO) -->
+        <aside>
+            <div>
+                <div class="logo-area">
+                    <span>⚡ GYM BODY MASTER</span>
+                </div>
+                <ul class="nav-links">
+                    <li class="active" id="nav-dashboard"><a onclick="switchSection('dashboard')">📊 Dashboard</a></li>
+                    <li id="nav-miembros"><a onclick="switchSection('miembros')">👥 Miembros</a></li>
+                    <li id="nav-membresias"><a onclick="switchSection('membresias')">💳 Membresías</a></li>
+                    <li id="nav-pagos"><a onclick="switchSection('pagos')">💰 Caja y Pagos</a></li>
+                    <li id="nav-inventario"><a onclick="switchSection('inventario')">📦 Inventario</a></li>
+                    <li id="nav-reportes"><a onclick="switchSection('reportes')">📈 Reportes</a></li>
+                    <li id="nav-whatsapp"><a onclick="switchSection('whatsapp')">💬 Mensajes WhatsApp</a></li>
+                    <li id="nav-empleados"><a onclick="switchSection('empleados')">🛡️ Gestión Personal</a></li>
+                    <li id="nav-configuracion"><a onclick="switchSection('configuracion')">⚙️ Configuración y Seguridad</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-footer">
+                <h4 id="user-role-display">Administrador</h4>
+                <p onclick="cerrarSesion()" style="cursor:pointer; color:var(--accent-red); margin-top:5px;">Cerrar Sesión</p>
+            </div>
+        </aside>
+
+        <!-- CONTENIDO PRINCIPAL DINÁMICO -->
+        <main>
+            
+            <!-- 1. VISTA DASHBOARD -->
+            <div id="section-dashboard" class="section-view active-view">
+                <div class="dashboard-left">
+                    <div class="welcome-banner">
+                        <div>
+                            <h1>¡Bienvenido, Administrador!</h1>
+                            <p>Panel integral operativo y estadístico con validación de datos.</p>
+                        </div>
+                        <div id="live-clock" style="font-size: 0.9rem; color: var(--accent-orange); font-weight: bold;"></div>
+                    </div>
+
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="header-metric"><span>Total Miembros</span><span style="color:var(--accent-green);">👥</span></div>
+                            <h3 id="stat-total">48</h3>
+                            <div class="sub-text">+4 este mes</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="header-metric"><span>Membresías Activas</span><span style="color:var(--accent-green);">🟢</span></div>
+                            <h3 id="stat-active">42</h3>
+                            <div class="sub-text">87.5% del total</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="header-metric"><span>Por Vencer (7 días)</span><span style="color:var(--accent-orange);">🟡</span></div>
+                            <h3 id="stat-warning">4</h3>
+                            <div class="sub-text">Atención requerida</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="header-metric"><span>Vencidas</span><span style="color:var(--accent-red);">🔴</span></div>
+                            <h3 id="stat-expired">2</h3>
+                            <div class="sub-text">Requiere cobro</div>
+                        </div>
+                    </div>
+
+                    <div class="analytics-grid">
+                        <div class="widget-box">
+                            <h3>Ingresos de los últimos 7 días</h3>
+                            <div style="height: 160px; position: relative;">
+                                <canvas id="incomeChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="widget-box">
+                            <h3>Productos con poco stock</h3>
+                            <div class="list-item"><span>Proteína Whey 2lb<br><small style="color:var(--text-muted);">2 unidades</small></span><span class="badge-danger">Stock Bajo</span></div>
+                            <div class="list-item"><span>Creatina Monohidratada<br><small style="color:var(--text-muted);">5 unidades</small></span><span class="badge-danger">Stock Bajo</span></div>
+                            <div class="list-item"><span>Pre-Entreno Explosivo<br><small style="color:var(--text-muted);">1 unidad</small></span><span class="badge-danger">Crítico</span></div>
+                        </div>
+                    </div>
+
+                    <div class="quick-actions">
+                        <button class="action-item" onclick="openModal('modalMiembro')"><div class="action-icon">👤</div>Registrar Membresía</button>
+                        <button class="action-item" onclick="openModal('modalPago')"><div class="action-icon">💳</div>Registrar Pago</button>
+                        <button class="action-item" onclick="openModal('modalProducto')"><div class="action-icon">📦</div>Nuevo Producto</button>
+                        <button class="action-item" onclick="switchSection('reportes')"><div class="action-icon">📈</div>Ver Reportes</button>
+                        <button class="action-item" onclick="switchSection('whatsapp')"><div class="action-icon">💬</div>WhatsApp API</button>
+                    </div>
+                </div>
+
+                <div class="dashboard-right">
+                    <div class="widget-box">
+                        <h3>Membresías próximas a vencer</h3>
+                        <div class="list-item"><span>Carlos Rodríguez (3001234567)<br><small style="color:var(--text-muted);">Plan Mensual</small></span><span class="badge-warning">1-3 días</span></div>
+                        <div class="list-item"><span>Laura Gómez (3119876543)<br><small style="color:var(--text-muted);">Plan Trimestral</small></span><span class="badge-warning">3-5 días</span></div>
+                    </div>
+                    <div class="widget-box">
+                        <h3>Membresías vencidas</h3>
+                        <div class="list-item"><span>Juan Pérez (3204567890)<br><small style="color:var(--text-muted);">Plan Mensual</small></span><span class="badge-danger">Vencido 2 días</span></div>
+                    </div>
+                    <div class="widget-box">
+                        <h3>Actividad reciente</h3>
+                        <div id="activity-log">
+                            <div class="list-item"><span>Rocío Patzy registrada<br><small style="color:var(--text-muted);">Cel: 3157894321</small></span><span style="font-size:0.7rem; color:var(--accent-green);">3:39 PM</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. VISTA MIEMBROS -->
+            <div id="section-miembros" class="full-width-view">
+                <div class="welcome-banner">
+                    <div><h1>Gestión Avanzada de Miembros</h1><p>Base de datos de socios con información de contacto y documentos oficiales.</p></div>
+                    <button class="btn btn-primary" onclick="openModal('modalMiembro')">+ Registrar Nueva Membresía</button>
+                </div>
+                <div class="widget-box">
+                    <h3>Directorio Completo</h3>
+                    <table class="data-table">
+                        <thead><tr><th>Documento</th><th>Nombre Completo</th><th>Celular / WhatsApp</th><th>Plan</th><th>F. Pago</th><th>F. Vencimiento</th><th>Estado</th><th>Acciones</th></tr></thead>
+                        <tbody id="tabla-miembros-body">
+                            <tr><td>CC 1098765432</td><td>Carlos Rodríguez</td><td>+57 3001234567</td><td>Mensual</td><td>2026-04-10</td><td>2026-05-10</td><td><span class="badge-warning">Por Vencer</span></td><td><button class="btn btn-secondary" style="padding:3px 8px; font-size:0.75rem;" onclick="lanzarWhatsAppRapido('3001234567', 'Carlos Rodríguez')">WhatsApp</button> <button class="btn btn-danger" style="padding:3px 8px; font-size:0.75rem;" onclick="suspenderSocio(this, 'Carlos Rodríguez')">Suspender</button></td></tr>
+                            <tr><td>CC 1054321987</td><td>Laura Gómez</td><td>+57 3119876543</td><td>Trimestral</td><td>2026-02-15</td><td>2026-05-15</td><td><span class="badge-warning">Por Vencer</span></td><td><button class="btn btn-secondary" style="padding:3px 8px; font-size:0.75rem;" onclick="lanzarWhatsAppRapido('3119876543', 'Laura Gómez')">WhatsApp</button> <button class="btn btn-danger" style="padding:3px 8px; font-size:0.75rem;" onclick="suspenderSocio(this, 'Laura Gómez')">Suspender</button></td></tr>
+                            <tr><td>TI 9908125432</td><td>Rocío Patzy</td><td>+57 3157894321</td><td>Mensual</td><td>2026-05-01</td><td>2026-06-01</td><td><span style="color:var(--accent-green)">Activo</span></td><td><button class="btn btn-secondary" style="padding:3px 8px; font-size:0.75rem;" onclick="lanzarWhatsAppRapido('3157894321', 'Rocío Patzy')">WhatsApp</button> <button class="btn btn-danger" style="padding:3px 8px; font-size:0.75rem;" onclick="suspenderSocio(this, 'Rocío Patzy')">Suspender</button></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. VISTA MEMBRESÍAS -->
+            <div id="section-membresias" class="full-width-view">
+                <div class="welcome-banner">
+                    <div>
+                        <h1>Planes y Tarifas de Membresía</h1>
+                        <p>Configuración general, creación de pases por día y edición de tarifas.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('modalPlan')">+ Crear Nuevo Plan / Tarifa</button>
+                </div>
+                
+                <!-- Contenedor dinámico de planes -->
+                <div class="analytics-grid" id="contenedor-planes" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="widget-box" data-plan-id="Mensual">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h3 class="plan-nombre">Plan Mensual</h3>
+                            <button class="btn btn-secondary" style="padding:2px 6px; font-size:0.7rem;" onclick="editarPlan('Mensual')">Editar</button>
+                        </div>
+                        <p style="color:var(--text-muted); font-size:0.8rem; margin-top:5px;" class="plan-desc">Acceso libre 30 días al área de pesas y cardio.</p>
+                        <h2 style="margin-top:15px; color:var(--accent-orange);" class="plan-precio">$60.000</h2>
+                    </div>
+                    <div class="widget-box" data-plan-id="Trimestral">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h3 class="plan-nombre">Plan Trimestral</h3>
+                            <button class="btn btn-secondary" style="padding:2px 6px; font-size:0.7rem;" onclick="editarPlan('Trimestral')">Editar</button>
+                        </div>
+                        <p style="color:var(--text-muted); font-size:0.8rem; margin-top:5px;" class="plan-desc">Acceso libre 90 días + rutina personalizada.</p>
+                        <h2 style="margin-top:15px; color:var(--accent-orange);" class="plan-precio">$160.000</h2>
+                    </div>
+                    <div class="widget-box" data-plan-id="Semestral">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h3 class="plan-nombre">Plan Semestral</h3>
+                            <button class="btn btn-secondary" style="padding:2px 6px; font-size:0.7rem;" onclick="editarPlan('Semestral')">Editar</button>
+                        </div>
+                        <p style="color:var(--text-muted); font-size:0.8rem; margin-top:5px;" class="plan-desc">Acceso libre 180 días + asesoría nutricional.</p>
+                        <h2 style="margin-top:15px; color:var(--accent-orange);" class="plan-precio">$300.000</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. VISTA PAGOS -->
+            <div id="section-pagos" class="full-width-view">
+                <div class="welcome-banner">
+                    <div><h1>Caja y Registro de Pagos</h1><p>Control financiero detallado por transacciones de membresía y barra.</p></div>
+                    <button class="btn btn-primary" onclick="openModal('modalPago')">+ Registrar Pago</button>
+                </div>
+                <div class="widget-box">
+                    <h3>Historial de Transacciones</h3>
+                    <table class="data-table">
+                        <thead><tr><th>ID TX</th><th>Socio / Cliente</th><th>Cédula</th><th>Concepto</th><th>Método</th><th>Monto</th><th>Fecha</th></tr></thead>
+                        <tbody>
+                            <tr><td>#0001</td><td>Carlos Rodríguez</td><td>1098765432</td><td>Renovación Plan Mensual</td><td>Efectivo</td><td>$60.000</td><td>Ayer</td></tr>
+                            <tr><td>#0002</td><td>Rocío Patzy</td><td>9908125432</td><td>Inscripción + Mensual</td><td>Transferencia</td><td>$80.000</td><td>Hoy, 3:39 PM</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 5. VISTA INVENTARIO -->
+            <div id="section-inventario" class="full-width-view">
+                <div class="welcome-banner">
+                    <div><h1>Inventario de Productos y Suplementos</h1><p>Control de stock de artículos deportivos, proteínas y bebidas hidratantes.</p></div>
+                    <button class="btn btn-primary" onclick="openModal('modalProducto')">+ Agregar Producto</button>
+                </div>
+                <div class="widget-box">
+                    <h3>Almacén General</h3>
+                    <table class="data-table">
+                        <thead><tr><th>Código</th><th>Producto</th><th>Categoría</th><th>Precio Venta</th><th>Stock</th><th>Estado</th></tr></thead>
+                        <tbody>
+                            <tr><td>#PR-01</td><td>Proteína Whey 2lb</td><td>Suplemento</td><td>$140.000</td><td>2 unidades</td><td><span class="badge-danger">Stock Bajo</span></td></tr>
+                            <tr><td>#PR-02</td><td>Creatina Monohidratada</td><td>Suplemento</td><td>$85.000</td><td>5 unidades</td><td><span class="badge-danger">Stock Bajo</span></td></tr>
+                            <tr><td>#PR-03</td><td>Bebida Hidratante 600ml</td><td>Bebidas</td><td>$5.000</td><td>24 unidades</td><td><span style="color:var(--accent-green)">Óptimo</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 6. VISTA REPORTES -->
+            <div id="section-reportes" class="full-width-view">
+                <div class="welcome-banner"><div><h1>Reportes Estadísticos y Analíticas</h1><p>Gráficos de rendimiento comercial y afluencia de socios.</p></div></div>
+                <div class="analytics-grid">
+                    <div class="widget-box">
+                        <h3>Crecimiento Anual de Socios</h3>
+                        <div style="height: 200px; position:relative;"><canvas id="reportChart"></canvas></div>
+                    </div>
+                    <div class="widget-box">
+                        <h3>Distribución de Ingresos</h3>
+                        <div style="height: 200px; position:relative;"><canvas id="pieChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. VISTA WHATSAPP -->
+            <div id="section-whatsapp" class="full-width-view">
+                <div class="welcome-banner"><div><h1>Central de Mensajería WhatsApp API</h1><p>Envío masivo y directo de alertas automáticas a celulares de socios.</p></div></div>
+                <div class="widget-box">
+                    <h3>Plantillas de Notificación Directa</h3>
+                    <div class="form-group full" style="margin-bottom:15px;">
+                        <label>Número de Celular Destino (Ej: 3001234567)</label>
+                        <input type="text" id="wa-phone" placeholder="Ingrese número de celular con indicativo">
+                    </div>
+                    <div class="form-group full" style="margin-bottom:15px;">
+                        <label>Mensaje Personalizado</label>
+                        <textarea id="wa-msg" placeholder="Hola, te recordamos que tu membresía en Gym Body Master está próxima a vencer...">Hola, te recordamos que tu membresía en Gym Body Master requiere renovación para mantener tu acceso activo.</textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="enviarWhatsAppDirecto()">Enviar Mensaje vía WhatsApp</button>
+                </div>
+            </div>
+
+            <!-- 8. GESTIÓN DE PERSONAL -->
+            <div id="section-empleados" class="full-width-view">
+                <div class="welcome-banner"><div><h1>Gestión de Personal y Administradores</h1><p>Panel exclusivo de control para dar de baja o retirar administradores/empleados que renuncien.</p></div></div>
+                <div class="widget-box">
+                    <h3>Personal Autorizado en el Sistema</h3>
+                    <table class="data-table">
+                        <thead><tr><th>Usuario</th><th>Rol</th><th>Correo Electrónico</th><th>Estado</th><th>Acciones Administrativas</th></tr></thead>
+                        <tbody id="tabla-empleados-body">
+                            <tr><td>bodymastergym</td><td><strong>Super Administrador</strong></td><td>admin@bodymaster.com</td><td><span style="color:var(--accent-green)">Activo</span></td><td>Protegido</td></tr>
+                            <tr><td>empleado_carlos</td><td>Empleado / Cajero</td><td>carlos.emp@bodymaster.com</td><td><span style="color:var(--accent-green)">Activo</span></td><td><button class="btn btn-danger" onclick="darDeBajaPersonal(this, 'empleado_carlos')">Dar de Baja / Retirar</button></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 9. CONFIGURACIÓN Y SEGURIDAD -->
+            <div id="section-configuracion" class="full-width-view">
+                <div class="welcome-banner"><div><h1>Configuración del Sistema y Seguridad</h1><p>Parámetros generales de operación y cambio de contraseña por correo.</p></div></div>
+                <div class="analytics-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="widget-box">
+                        <h3>Ajustes Generales</h3>
+                        <div class="form-group">
+                            <label>Nombre del Establecimiento</label>
+                            <input type="text" value="GYM BODY MASTER">
+                        </div>
+                        <div class="form-group">
+                            <label>NIT / Identificación Fiscal</label>
+                            <input type="text" value="900.876.543-1">
+                        </div>
+                        <div class="form-group">
+                            <label>Moneda Oficial</label>
+                            <select><option>Peso Colombiano ($)</option><option>Dólar (USD)</option></select>
+                        </div>
+                        <button class="btn btn-primary" onclick="alert('Configuración guardada correctamente.')">Guardar Cambios</button>
+                    </div>
+                    <div class="widget-box">
+                        <h3>Cambiar Contraseña por Correo</h3>
+                        <div class="form-group">
+                            <label>Correo Electrónico Registrado</label>
+                            <input type="email" id="email-recuperacion" placeholder="admin@bodymaster.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Nueva Contraseña Deseada</label>
+                            <input type="password" id="nueva-pass" placeholder="Nueva contraseña segura">
+                        </div>
+                        <button class="btn btn-primary" onclick="procesarCambioPass()">Solicitar Cambio y Actualizar</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MODAL EXTENSO: REGISTRAR MEMBRESÍA -->
+    <div id="modalMiembro" class="modal">
+        <div class="modal-content">
+            <h2>Registrar Nueva Membresía / Socio</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Tipo de Documento</label>
+                    <select id="tipoDoc">
+                        <option value="CC">Cédula de Ciudadanía (CC)</option>
+                        <option value="TI">Tarjeta de Identidad (TI)</option>
+                        <option value="CE">Cédula de Extranjería (CE)</option>
+                        <option value="PP">Pasaporte (PP)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Número de Documento</label>
+                    <input type="text" id="numDoc" placeholder="Ej: 1098765432">
+                </div>
+                <div class="form-group full">
+                    <label>Nombre Completo</label>
+                    <input type="text" id="nombreMiembro" placeholder="Nombres y Apellidos">
+                </div>
+                <div class="form-group">
+                    <label>Número de Celular / WhatsApp</label>
+                    <input type="text" id="celularMiembro" placeholder="Ej: 3001234567 (Necesario para WhatsApp)">
+                </div>
+                <div class="form-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" id="emailMiembro" placeholder="correo@dominio.com">
+                </div>
+                <div class="form-group">
+                    <label>Seleccionar Plan</label>
+                    <select id="planMiembro">
+                        <option value="Plan Mensual">Plan Mensual - $60.000</option>
+                        <option value="Plan Trimestral">Plan Trimestral - $160.000</option>
+                        <option value="Plan Semestral">Plan Semestral - $300.000</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Fecha de Pago / Inicio</label>
+                    <input type="date" id="fechaInicio">
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('modalMiembro')">Cancelar</button>
+                <button class="btn btn-primary" onclick="registrarMiembroCompleto()">Guardar Membresía</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EXTENSO: CREAR / EDITAR PLAN DE MEMBRESÍA -->
+    <div id="modalPlan" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-plan-title">Configurar Nuevo Tipo de Plan</h2>
+            <div class="form-row">
+                <div class="form-group full">
+                    <label>Nombre del Plan (Ej: Pase Diario / Plan Anual)</label>
+                    <input type="text" id="planNombreInput" placeholder="Ej: Pase de 1 Día">
+                </div>
+                <div class="form-group">
+                    <label>Precio del Plan ($)</label>
+                    <input type="number" id="planPrecioInput" placeholder="Ej: 10000">
+                </div>
+                <div class="form-group">
+                    <label>Duración (Días / Vigencia)</label>
+                    <input type="number" id="planDiasInput" placeholder="Ej: 1 (Para un día)">
+                </div>
+                <div class="form-group full">
+                    <label>Descripción y Beneficios</label>
+                    <textarea id="planDescInput" placeholder="Ej: Acceso por 24 horas a todas las áreas de musculación y cardio."></textarea>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('modalPlan')">Cancelar</button>
+                <button class="btn btn-primary" onclick="guardarPlanPersonalizado()">Guardar Plan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EXTENSO: REGISTRAR PAGO (CON BUSCADOR PREDICTIVO Y ESTADOS DE COLOR) -->
+    <div id="modalPago" class="modal">
+        <div class="modal-content">
+            <h2>Registrar Transacción de Pago</h2>
+            <div class="form-row">
+                <div class="form-group full" style="position: relative;">
+                    <label>Buscar Socio por Cédula o Nombre</label>
+                    <input type="text" id="pagoSocio" placeholder="Escribe para buscar socio..." oninput="filtrarSociosBuscador(this.value)" autocomplete="off">
+                    <!-- Contenedor desplegable de sugerencias -->
+                    <div id="sugerencias-socios" style="display: none; position: absolute; top: 100%; left: 0; width: 100%; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; max-height: 150px; overflow-y: auto; z-index: 10;"></div>
+                </div>
+                <div class="form-group">
+                    <label>Concepto de Pago</label>
+                    <select id="pagoConcepto">
+                        <option value="Inscripción y Mensualidad">Inscripción y Mensualidad</option>
+                        <option value="Renovación Plan Mensual">Renovación Plan Mensual</option>
+                        <option value="Renovación Plan Trimestral">Renovación Plan Trimestral</option>
+                        <option value="Compra de Suplemento">Compra de Suplemento / Barra</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Monto a Cobrar ($)</label>
+                    <input type="number" id="pagoMonto" placeholder="Ej: 60000">
+                </div>
+                <div class="form-group full">
+                    <label>Método de Pago</label>
+                    <select id="pagoMetodo">
+                        <option value="Efectivo">Efectivo</option>
+                        <option value="Transferencia Bancaria">Transferencia Bancaria (Nequi / Daviplata)</option>
+                        <option value="Tarjeta Débito/Crédito">Tarjeta Débito / Crédito</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('modalPago')">Cancelar</button>
+                <button class="btn btn-primary" onclick="registrarPagoCompleto()">Procesar Cobro</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EXTENSO: NUEVO PRODUCTO -->
+    <div id="modalProducto" class="modal">
+        <div class="modal-content">
+            <h2>Registrar Nuevo Producto en Inventario</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Código de Producto</label>
+                    <input type="text" id="prodCodigo" placeholder="Ej: #PR-04">
+                </div>
+                <div class="form-group">
+                    <label>Nombre del Producto</label>
+                    <input type="text" id="prodNombre" placeholder="Ej: Creatina 500g">
+                </div>
+                <div class="form-group">
+                    <label>Categoría</label>
+                    <select id="prodCategoria">
+                        <option value="Suplemento">Suplemento</option>
+                        <option value="Bebidas">Bebidas</option>
+                        <option value="Accesorios">Accesorios (Guantes, Straps)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Precio de Venta ($)</label>
+                    <input type="number" id="prodPrecio" placeholder="Ej: 85000">
+                </div>
+                <div class="form-group full">
+                    <label>Stock Inicial en Bodega</label>
+                    <input type="number" id="prodStock" placeholder="Ej: 10">
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('modalProducto')">Cancelar</button>
+                <button class="btn btn-primary" onclick="registrarProductoCompleto()">Guardar en Inventario</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts de Control Completo -->
+    <script>
+        // Reloj en tiempo real
+        function updateClock() {
+            const now = new Date();
+            const clockEl = document.getElementById('live-clock');
+            if(clockEl) clockEl.innerText = now.toLocaleTimeString();
+        }
+        setInterval(updateClock, 1000);
+
+        // Lógica de Autenticación Restrictiva
+        function intentarLogin() {
+            const user = document.getElementById('login-user').value.trim();
+            const pass = document.getElementById('login-pass').value.trim();
+
+            const defaultUser = "bodymastergym";
+            const defaultPass = "master123";
+            
+            const storedUser = localStorage.getItem('bm_user');
+            const storedPass = localStorage.getItem('bm_pass');
+            const configurado = localStorage.getItem('bm_configurado');
+
+            if (!configurado) {
+                if (user === defaultUser && pass === defaultPass) {
+                    const nuevoUserDef = prompt("Es tu primer ingreso. Configura tu nuevo USUARIO de Administrador personalizado:");
+                    const nuevaPassDef = prompt("Configura tu nueva CONTRASEÑA de Administrador:");
+                    
+                    if (nuevoUserDef && nuevaPassDef) {
+                        localStorage.setItem('bm_user', nuevoUserDef);
+                        localStorage.setItem('bm_pass', nuevaPassDef);
+                        localStorage.setItem('bm_configurado', 'true');
+                        alert("¡Credenciales configuradas con éxito! Las credenciales de fábrica han sido deshabilitadas.");
+                        
+                        document.getElementById('auth-screen').style.display = 'none';
+                        document.getElementById('app-layout').style.display = 'flex';
+                        document.getElementById('user-role-display').innerText = "Admin: " + nuevoUserDef;
+                    } else {
+                        alert("Debes configurar un usuario y contraseña para continuar.");
+                    }
+                } else {
+                    alert("Por favor ingresa con las credenciales de fábrica (bodymastergym / master123) para realizar la configuración inicial.");
+                }
+            } else {
+                if (user === storedUser && pass === storedPass) {
+                    document.getElementById('auth-screen').style.display = 'none';
+                    document.getElementById('app-layout').style.display = 'flex';
+                    document.getElementById('user-role-display').innerText = "Admin: " + storedUser;
+                } else {
+                    alert("Usuario o contraseña incorrectos. Las credenciales temporales de fábrica ya no son válidas.");
+                }
+            }
+        }
+
+        function cerrarSesion() {
+            document.getElementById('app-layout').style.display = 'none';
+            document.getElementById('auth-screen').style.display = 'flex';
+            document.getElementById('login-user').value = '';
+            document.getElementById('login-pass').value = '';
+        }
+
+        function procesarCambioPass() {
+            const email = document.getElementById('email-recuperacion').value;
+            const nuevaPass = document.getElementById('nueva-pass').value;
+
+            if(!email || !nuevaPass) {
+                alert("Por favor ingrese su correo electrónico y la nueva contraseña.");
+                return;
+            }
+
+            alert(`Enlace de verificación enviado al correo: ${email}. Contraseña actualizada localmente.`);
+            localStorage.setItem('bm_pass', nuevaPass);
+            document.getElementById('nueva-pass').value = '';
+        }
+
+        function darDeBajaPersonal(buttonElement, nombreEmpleado) {
+            const confirmar = confirm(`¿Está seguro de retirar/dar de baja a '${nombreEmpleado}' por renuncia? Perderá el acceso.`);
+            if(confirmar) {
+                const fila = buttonElement.closest('tr');
+                fila.style.opacity = '0.4';
+                fila.querySelector('td:nth-child(4)').innerHTML = '<span class="badge-danger">Retirado / Inactivo</span>';
+                buttonElement.remove();
+                alert(`El usuario ${nombreEmpleado} ha sido dado de baja correctamente.`);
+            }
+        }
+
+        // Navegación funcional del Banner Lateral
+        function switchSection(sectionId) {
+            document.querySelectorAll('.section-view, .full-width-view').forEach(el => {
+                el.classList.remove('active-view');
+            });
+            document.querySelectorAll('.nav-links li').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            const target = document.getElementById('section-' + sectionId);
+            if(target) target.classList.add('active-view');
+
+            const navItem = document.getElementById('nav-' + sectionId);
+            if(navItem) navItem.classList.add('active');
+        }
+
+        // Gráfica Principal de Dashboard (Chart.js)
+        const ctx = document.getElementById('incomeChart').getContext('2d');
+        const incomeChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+                datasets: [{
+                    data: [120000, 190000, 150000, 220000, 310000, 250000, 290000],
+                    backgroundColor: '#f59e0b',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: '#9ca3af', font: { size: 10 } }, grid: { display: false } },
+                    y: { ticks: { color: '#9ca3af', font: { size: 10 } }, grid: { color: '#1f293d' } }
+                }
+            }
+        });
+
+        // Gráfica de Reportes Anual
+        const ctxRep = document.getElementById('reportChart').getContext('2d');
+        new Chart(ctxRep, {
+            type: 'line',
+            data: {
+                labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Miembros Nuevos',
+                    data: [10, 25, 48, 30, 42, 55],
+                    borderColor: '#10b981',
+                    tension: 0.3,
+                    fill: false
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+
+        // Gráfica Circular de Ingresos
+        const ctxPie = document.getElementById('pieChart').getContext('2d');
+        new Chart(ctxPie, {
+            type: 'doughnut',
+            data: {
+                labels: ['Membresías', 'Suplementos', 'Bebidas'],
+                datasets: [{
+                    data: [75, 15, 10],
+                    backgroundColor: ['#f59e0b', '#ef4444', '#10b981']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // Modales
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        // Sincronización automática del selector en Registrar Miembro
+        function actualizarSelectoresPlanes() {
+            const selectPlanMiembro = document.getElementById('planMiembro');
+            if(!selectPlanMiembro) return;
+
+            const valorActual = selectPlanMiembro.value;
+            selectPlanMiembro.innerHTML = '';
+
+            const tarjetas = document.querySelectorAll('#contenedor-planes .widget-box');
+            tarjetas.forEach(tarjeta => {
+                const nombrePlan = tarjeta.querySelector('.plan-nombre').innerText;
+                const precioPlan = tarjeta.querySelector('.plan-precio').innerText;
+
+                const opt = document.createElement('option');
+                opt.value = nombrePlan;
+                opt.text = `${nombrePlan} - ${precioPlan}`;
+                selectPlanMiembro.appendChild(opt);
+            });
+
+            if(valorActual) {
+                selectPlanMiembro.value = valorActual;
+            }
+        }
+
+        // Lógica de planes y edición optimizada
+        let planEditandoActualId = null;
+
+        function guardarPlanPersonalizado() {
+            const nombre = document.getElementById('planNombreInput').value.trim();
+            const precio = document.getElementById('planPrecioInput').value.trim();
+            const descripcion = document.getElementById('planDescInput').value.trim();
+
+            if(!nombre || !precio) {
+                alert("Por favor ingrese el nombre y el precio del plan.");
+                return;
+            }
+
+            const contenedor = document.getElementById('contenedor-planes');
+
+            if(planEditandoActualId) {
+                const tarjeta = contenedor.querySelector(`[data-plan-id="${planEditandoActualId}"]`);
+                if(tarjeta) {
+                    tarjeta.querySelector('.plan-nombre').innerText = nombre;
+                    tarjeta.querySelector('.plan-desc').innerText = descripcion || 'Sin descripción adicional.';
+                    tarjeta.querySelector('.plan-precio').innerText = '$' + Number(precio).toLocaleString();
+                    tarjeta.setAttribute('data-plan-id', nombre);
+                    tarjeta.querySelector('button').setAttribute('onclick', `editarPlan('${nombre}')`);
+                }
+                alert(`Plan '${nombre}' actualizado correctamente.`);
+                planEditandoActualId = null;
+            } else {
+                const nuevaTarjeta = document.createElement('div');
+                nuevaTarjeta.className = 'widget-box';
+                nuevaTarjeta.setAttribute('data-plan-id', nombre);
+                nuevaTarjeta.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3 class="plan-nombre">${nombre}</h3>
+                        <button class="btn btn-secondary" style="padding:2px 6px; font-size:0.7rem;" onclick="editarPlan('${nombre}')">Editar</button>
+                    </div>
+                    <p style="color:var(--text-muted); font-size:0.8rem; margin-top:5px;" class="plan-desc">${descripcion || 'Acceso especial temporal.'}</p>
+                    <h2 style="margin-top:15px; color:var(--accent-orange);" class="plan-precio">$${Number(precio).toLocaleString()}</h2>
+                `;
+                contenedor.appendChild(nuevaTarjeta);
+                alert(`Nuevo plan '${nombre}' agregado con éxito.`);
+            }
+
+            actualizarSelectoresPlanes();
+
+            closeModal('modalPlan');
+            document.getElementById('planNombreInput').value = '';
+            document.getElementById('planPrecioInput').value = '';
+            document.getElementById('planDiasInput').value = '';
+            document.getElementById('planDescInput').value = '';
+            document.getElementById('modal-plan-title').innerText = 'Configurar Nuevo Tipo de Plan';
+        }
+
+        function editarPlan(idPlan) {
+            const contenedor = document.getElementById('contenedor-planes');
+            const tarjeta = contenedor.querySelector(`[data-plan-id="${idPlan}"]`);
+            
+            if(tarjeta) {
+                const titulo = tarjeta.querySelector('.plan-nombre').innerText;
+                const desc = tarjeta.querySelector('.plan-desc').innerText;
+                const precioTxt = tarjeta.querySelector('.plan-precio').innerText.replace('$', '').replace(/\./g, '');
+
+                document.getElementById('planNombreInput').value = titulo;
+                document.getElementById('planPrecioInput').value = precioTxt;
+                document.getElementById('planDescInput').value = desc;
+                document.getElementById('modal-plan-title').innerText = 'Editar Plan: ' + titulo;
+
+                planEditandoActualId = idPlan;
+                openModal('modalPlan');
+            }
+        }
+
+        // Lógica de registro dinámico extendido
+        let totalMiembros = 48;
+        let miembrosActivos = 42;
+        let contadorTransacciones = 2; // Inicia en 2 puesto que ya hay #0001 y #0002 en la tabla fija
+
+        function calcularVencimiento(fechaInicioStr, plan) {
+            const fecha = fechaInicioStr ? new Date(fechaInicioStr + 'T00:00:00') : new Date();
+            const planLower = plan.toLowerCase();
+            if (planLower.includes('trimestral')) {
+                fecha.setMonth(fecha.getMonth() + 3);
+            } else if (planLower.includes('semestral')) {
+                fecha.setMonth(fecha.getMonth() + 6);
+            } else if (planLower.includes('día') || planLower.includes('dia') || planLower.includes('pase')) {
+                fecha.setDate(fecha.getDate() + 1);
+            } else {
+                fecha.setMonth(fecha.getMonth() + 1);
+            }
+            return fecha.toISOString().split('T')[0];
+        }
+
+        function registrarMiembroCompleto() {
+            const tipoDoc = document.getElementById('tipoDoc').value;
+            const numDoc = document.getElementById('numDoc').value;
+            const nombre = document.getElementById('nombreMiembro').value;
+            const celular = document.getElementById('celularMiembro').value;
+            const plan = document.getElementById('planMiembro').value;
+            let fechaInicio = document.getElementById('fechaInicio').value;
+
+            if(!numDoc || !nombre || !celular) {
+                alert('Por favor complete los campos obligatorios: Cédula, Nombre y Celular.');
+                return;
+            }
+
+            if(!fechaInicio) {
+                fechaInicio = new Date().toISOString().split('T')[0];
+            }
+
+            const fechaVencimiento = calcularVencimiento(fechaInicio, plan);
+            
+            totalMiembros++;
+            miembrosActivos++;
+            
+            document.getElementById('stat-total').innerText = totalMiembros;
+            document.getElementById('stat-active').innerText = miembrosActivos;
+
+            const tabla = document.getElementById('tabla-miembros-body');
+            const nuevaFila = document.createElement('tr');
+            nuevaFila.innerHTML = `<td>${tipoDoc} ${numDoc}</td><td>${nombre}</td><td>+57 ${celular}</td><td>${plan}</td><td>${fechaInicio}</td><td>${fechaVencimiento}</td><td><span style="color:var(--accent-green)">Activo</span></td><td><button class="btn btn-secondary" style="padding:3px 8px; font-size:0.75rem;" onclick="lanzarWhatsAppRapido('${celular}', '${nombre}')">WhatsApp</button> <button class="btn btn-danger" style="padding:3px 8px; font-size:0.75rem;" onclick="suspenderSocio(this, '${nombre}')">Suspender</button></td>`;
+            tabla.prepend(nuevaFila);
+
+            const log = document.getElementById('activity-log');
+            const newLog = document.createElement('div');
+            newLog.className = 'list-item';
+            newLog.innerHTML = `<span>${nombre} (${tipoDoc})<br><small style="color:var(--text-muted);">Cel: ${celular}</small></span><span style="font-size:0.7rem; color:var(--accent-green);">Ahora</span>`;
+            log.prepend(newLog);
+
+            closeModal('modalMiembro');
+            document.getElementById('numDoc').value = '';
+            document.getElementById('nombreMiembro').value = '';
+            document.getElementById('celularMiembro').value = '';
+            document.getElementById('emailMiembro').value = '';
+            document.getElementById('fechaInicio').value = '';
+            alert('¡Membresía registrada con éxito! Fechas de pago y vencimiento calculadas.');
+        }
+
+        function suspenderSocio(buttonElement, nombreSocio) {
+            const confirmar = confirm(`¿Desea suspender la membresía de '${nombreSocio}'? El socio quedará inactivo pero guardado por si desea reactivarse.`);
+            if(confirmar) {
+                const fila = buttonElement.closest('tr');
+                fila.style.opacity = '0.4';
+                const celdaEstado = fila.querySelector('td:nth-child(7)');
+                if(celdaEstado) {
+                    celdaEstado.innerHTML = '<span class="badge-danger">Suspendido</span>';
+                }
+                buttonElement.className = 'btn btn-primary';
+                buttonElement.style.padding = '3px 8px';
+                buttonElement.style.fontSize = '0.75rem';
+                buttonElement.innerText = 'Reactivar';
+                buttonElement.setAttribute('onclick', `reactivarSocio(this, '${nombreSocio}')`);
+                alert(`La membresía de ${nombreSocio} ha sido suspendida correctamente.`);
+            }
+        }
+
+        function reactivarSocio(buttonElement, nombreSocio) {
+            const confirmar = confirm(`¿Desea reactivar la membresía de '${nombreSocio}'?`);
+            if(confirmar) {
+                const fila = buttonElement.closest('tr');
+                fila.style.opacity = '1';
+                const celdaEstado = fila.querySelector('td:nth-child(7)');
+                if(celdaEstado) {
+                    celdaEstado.innerHTML = '<span style="color:var(--accent-green)">Activo</span>';
+                }
+                buttonElement.className = 'btn btn-danger';
+                buttonElement.style.padding = '3px 8px';
+                buttonElement.style.fontSize = '0.75rem';
+                buttonElement.innerText = 'Suspender';
+                buttonElement.setAttribute('onclick', `suspenderSocio(this, '${nombreSocio}')`);
+                alert(`La membresía de ${nombreSocio} ha sido reactivada exitosamente.`);
+            }
+        }
+
+        // FUNCIONES DE BUSCADOR PREDICTIVO Y COLORES EN PAGOS
+        function evaluarEstadoMembresia(fechaVencimientoStr) {
+            if (!fechaVencimientoStr || fechaVencimientoStr === 'N/A') return 'verde';
+            
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            
+            const vencimiento = new Date(fechaVencimientoStr + 'T00:00:00');
+            const diferenciaDias = Math.ceil((vencimiento - hoy) / (1000 * 60 * 60 * 24));
+
+            if (diferenciaDias < 0) {
+                return 'rojo'; // Vencida
+            } else if (diferenciaDias <= 7) {
+                return 'amarillo'; // Por vencer (próximos 7 días)
+            } else {
+                return 'verde'; // Al día / Activa
+            }
+        }
+
+        function filtrarSociosBuscador(texto) {
+            const contenedorSugerencias = document.getElementById('sugerencias-socios');
+            contenedorSugerencias.innerHTML = '';
+            
+            if (!texto || texto.trim() === '') {
+                contenedorSugerencias.style.display = 'none';
+                return;
+            }
+
+            const filasMiembros = document.querySelectorAll('#tabla-miembros-body tr');
+            let encontrados = 0;
+            
+            filasMiembros.forEach(fila => {
+                const celdas = fila.querySelectorAll('td');
+                if (celdas.length < 6) return;
+
+                const documento = celdas[0].innerText;
+                const nombre = celdas[1].innerText;
+                const fechaVencimiento = celdas[5].innerText;
+
+                const textoBusqueda = texto.toLowerCase();
+                if (documento.toLowerCase().includes(textoBusqueda) || nombre.toLowerCase().includes(textoBusqueda)) {
+                    encontrados++;
+                    
+                    const estadoColor = evaluarEstadoMembresia(fechaVencimiento);
+                    let colorHex = '#10b981'; // Verde por defecto
+                    if (estadoColor === 'rojo') colorHex = '#ef4444';
+                    if (estadoColor === 'amarillo') colorHex = '#f59e0b';
+
+                    const divItem = document.createElement('div');
+                    divItem.style.padding = '8px 12px';
+                    divItem.style.cursor = 'pointer';
+                    divItem.style.borderBottom = '1px solid var(--border-color)';
+                    divItem.style.fontSize = '0.8rem';
+                    divItem.style.display = 'flex';
+                    divItem.style.justifyContent = 'space-between';
+                    divItem.style.alignItems = 'center';
+
+                    divItem.innerHTML = `
+                        <span style="color: ${colorHex}; font-weight: bold;">● ${nombre} (${documento})</span>
+                        <span style="font-size: 0.7rem; color: var(--text-muted);">Vence: ${fechaVencimiento}</span>
+                    `;
+
+                    divItem.onmouseover = () => divItem.style.background = '#1f293d';
+                    divItem.onmouseout = () => divItem.style.background = 'transparent';
+                    
+                    divItem.onclick = () => {
+                        document.getElementById('pagoSocio').value = `${nombre} - ${documento}`;
+                        contenedorSugerencias.style.display = 'none';
+                    };
+
+                    contenedorSugerencias.appendChild(divItem);
+                }
+            });
+
+            if (encontrados > 0) {
+                contenedorSugerencias.style.display = 'block';
+            } else {
+                contenedorSugerencias.style.display = 'none';
+            }
+        }
+
+        document.addEventListener('click', function(e) {
+            const inputSocio = document.getElementById('pagoSocio');
+            const sugerencias = document.getElementById('sugerencias-socios');
+            if (inputSocio && sugerencias && !inputSocio.contains(e.target) && !sugerencias.contains(e.target)) {
+                sugerencias.style.display = 'none';
+            }
+        });
+
+        function registrarPagoCompleto() {
+            const socio = document.getElementById('pagoSocio').value;
+            const concepto = document.getElementById('pagoConcepto').value;
+            const monto = document.getElementById('pagoMonto').value;
+            const metodo = document.getElementById('pagoMetodo').value;
+
+            if(!socio || !monto) {
+                alert('Por favor indique el socio y el monto del pago.');
+                return;
+            }
+
+            // Incrementar y formatear consecutivo de factura (#0003, #0004...)
+            contadorTransacciones++;
+            const idTxFormateado = `#${String(contadorTransacciones).padStart(4, '0')}`;
+
+            const tablaPagos = document.querySelector('#section-pagos .data-table tbody');
+            if (tablaPagos) {
+                const nuevaFilaTx = document.createElement('tr');
+                nuevaFilaTx.innerHTML = `
+                    <td>${idTxFormateado}</td>
+                    <td>${socio}</td>
+                    <td>N/A</td>
+                    <td>${concepto}</td>
+                    <td>${metodo}</td>
+                    <td>$${Number(monto).toLocaleString()}</td>
+                    <td>Justo ahora</td>
+                `;
+                tablaPagos.prepend(nuevaFilaTx);
+            }
+
+            alert(`Pago registrado exitosamente con el comprobante ${idTxFormateado} por $${monto} (${concepto}) mediante ${metodo}.`);
+            closeModal('modalPago');
+            document.getElementById('pagoSocio').value = '';
+            document.getElementById('pagoMonto').value = '';
+        }
+
+        function registrarProductoCompleto() {
+            const codigo = document.getElementById('prodCodigo').value;
+            const nombre = document.getElementById('prodNombre').value;
+            const stock = document.getElementById('prodStock').value;
+
+            if(!codigo || !nombre || !stock) {
+                alert('Por favor complete todos los datos del producto.');
+                return;
+            }
+
+            alert(`Producto ${nombre} (${codigo}) agregado con un stock inicial de ${stock} unidades.`);
+            closeModal('modalProducto');
+            document.getElementById('prodCodigo').value = '';
+            document.getElementById('prodNombre').value = '';
+            document.getElementById('prodPrecio').value = '';
+            document.getElementById('prodStock').value = '';
+        }
+
+        function enviarWhatsAppDirecto() {
+            const phone = document.getElementById('wa-phone').value;
+            const msg = document.getElementById('wa-msg').value;
+
+            if(!phone || !msg) {
+                alert('Por favor ingrese el número de celular y el mensaje.');
+                return;
+            }
+
+            const url = `https://api.whatsapp.com/send?phone=57${phone}&text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+        }
+
+        function lanzarWhatsAppRapido(celular, nombre) {
+            const msg = `Hola ${nombre}, te escribimos de Gym Body Master para recordarte el estado de tu membresía. ¡Te esperamos!`;
+            const url = `https://api.whatsapp.com/send?phone=57${celular}&text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+        }
+
+        // Ejecutar al iniciar la página para asegurar la sincronización inicial
+        window.onload = function() {
+            actualizarSelectoresPlanes();
+        };
+    </script>
+</body>
+</html>
